@@ -18,26 +18,42 @@ def compute_metrics(df):
     df['dst_host_srv_count'] = df.apply(lambda row: compute_dst_host_srv_count(df, row['tcp.dstport']), axis=1)
     df['dst_host_diff_srv_rate'] = df.apply(lambda row: compute_dst_host_diff_srv_rate(df, row['tcp.dstport']), axis=1)
     df['count'] = df.apply(lambda row: compute_count(df, row['tcp.dstport']), axis=1)
-    df['src_bytes'] = df['tcp.srcport']  # This is just an example, adjust accordingly
-    df['dst_bytes'] = df['tcp.dstport']  # This is just an example, adjust accordingly
+    df['src_bytes'] = df['ip.len']  # Example: Assuming ip.len represents source bytes
+    df['dst_bytes'] = df['tcp.urgent_pointer']  # Example: Assuming tcp.urgent_pointer represents destination bytes
     return df
 
 # Define helper functions for metrics calculation
 def compute_same_srv_rate(df, src_port):
     same_srv_connections = df[df['tcp.srcport'] == src_port]
-    return len(same_srv_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(same_srv_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_diff_srv_rate(df, src_port):
     diff_srv_connections = df[df['tcp.srcport'] != src_port]
-    return len(diff_srv_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(diff_srv_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_dst_host_same_srv_rate(df, dst_port):
     same_srv_connections = df[df['tcp.dstport'] == dst_port]
-    return len(same_srv_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(same_srv_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_dst_host_srv_diff_host_rate(df, dst_port):
     diff_srv_connections = df[df['tcp.dstport'] != dst_port]
-    return len(diff_srv_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(diff_srv_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_dst_host_srv_count(df, dst_port):
     srv_count = len(df[df['tcp.dstport'] == dst_port])
@@ -53,19 +69,31 @@ def compute_dst_host_diff_srv_rate(df, dst_port):
 
 def compute_dst_host_srv_serror_rate(df, dst_port):
     serror_connections = df[(df['tcp.dstport'] == dst_port) & (df['tcp.flags.syn'] == True)]
-    return len(serror_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(serror_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_dst_host_rerror_rate(df, dst_port):
     rerror_connections = df[(df['tcp.dstport'] == dst_port) & (df['tcp.flags.reset'] == True)]
-    return len(rerror_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(rerror_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_dst_host_serror_rate(df, dst_port):
     serror_connections = df[(df['tcp.dstport'] == dst_port) & (df['tcp.flags.syn'] == True)]
-    return len(serror_connections) / len(df)
+    total_connections = len(df)
+    if total_connections > 0:
+        return len(serror_connections) / total_connections
+    else:
+        return 0.0
 
 def compute_count(df, dst_port):
-    count_connections = df[df['tcp.dstport'] == dst_port]
-    return len(count_connections)
+    count_connections = len(df[df['tcp.dstport'] == dst_port])
+    return count_connections
 
 # Compute the metrics
 df_with_metrics = compute_metrics(df)
